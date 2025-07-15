@@ -8,10 +8,12 @@ namespace Agenda.API.Application;
 public class ReminderService
 {
     private readonly AgendaDbContext _db;
+    private readonly ReminderPublisher _eventPublisher;
 
-    public ReminderService(AgendaDbContext db)
+    public ReminderService(AgendaDbContext db, ReminderPublisher eventPublisher)
     {
         _db = db;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task<List<Reminder>> GetAllAsync(ClaimsPrincipal user)
@@ -35,6 +37,15 @@ public class ReminderService
         reminder.UserId = GetUserId(user);
         _db.Reminders.Add(reminder);
         await _db.SaveChangesAsync();
+
+        await _eventPublisher.PublishReminderCreated(
+            new ReminderCreatedEvent(
+                reminder.UserId.ToString(),
+                reminder.Title,
+                reminder.ScheduledFor
+            )
+        );
+
         return reminder;
     }
 

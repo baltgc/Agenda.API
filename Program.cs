@@ -31,6 +31,8 @@ builder
 
 builder.Services.AddValidatorsFromAssemblyContaining<ReminderRequestValidator>();
 
+builder.Services.AddSingleton<ReminderPublisher>();
+
 // JWT y servicios
 builder.Services.AddScoped<ReminderService>();
 
